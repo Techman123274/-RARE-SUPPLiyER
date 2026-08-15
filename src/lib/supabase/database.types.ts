@@ -324,6 +324,18 @@ export interface Database {
       staff_products: { Args: Record<string, never>; Returns: Database["public"]["Tables"]["products"]["Row"][] };
       staff_item_requests: { Args: Record<string, never>; Returns: Database["public"]["Tables"]["item_requests"]["Row"][] };
       cancel_my_item_request: { Args: { p_id: string }; Returns: undefined };
+      submit_my_review: {
+        Args: {
+          p_product_id: string;
+          p_rating: number;
+          p_title: string;
+          p_body: string;
+          p_order_id?: string | null;
+          p_order_item_id?: string | null;
+          p_size_purchased?: string | null;
+        };
+        Returns: string;
+      };
       admin_update_item_request: {
         Args: {
           p_id: string;

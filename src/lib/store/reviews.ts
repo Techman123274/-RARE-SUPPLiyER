@@ -22,6 +22,9 @@ export type ReviewSort = (typeof REVIEW_SORTS)[number];
 
 export const PURCHASED_ORDER_STATUSES = ["paid", "processing", "shipped", "delivered"] as const;
 
+/** Checkout has no payment yet, so pending orders are still reviewable. */
+export const REVIEWABLE_ORDER_STATUSES = ["pending", "paid", "processing", "shipped", "delivered"] as const;
+
 export function starsLabel(rating: number): string {
   const full = Math.max(1, Math.min(5, Math.round(rating)));
   return "★".repeat(full) + "☆".repeat(5 - full);

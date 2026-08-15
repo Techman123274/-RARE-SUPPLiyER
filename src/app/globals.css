@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --color-background: #07080c;
+  --color-background: #000000;
   --color-foreground: #f3f5f8;
   --color-surface: #0d0e14;
   --color-surface-elevated: #13141c;
@@ -48,7 +48,7 @@
   * {
     @apply border-border;
     scrollbar-width: thin;
-    scrollbar-color: #3a4258 #07080c;
+    scrollbar-color: #3a4258 #000000;
   }
 
   html {
@@ -61,10 +61,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body antialiased;
-    background-image:
-      radial-gradient(ellipse 72% 42% at 50% -16%, rgba(61, 158, 255, 0.1), transparent 58%),
-      radial-gradient(ellipse 46% 36% at 100% 100%, rgba(192, 210, 255, 0.04), transparent 55%);
+    @apply bg-black text-foreground font-body antialiased;
     min-height: 100vh;
   }
 
@@ -74,13 +71,13 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #07080c;
+    background: #000000;
   }
 
   ::-webkit-scrollbar-thumb {
     background: #3a4258;
     border-radius: 999px;
-    border: 2px solid #07080c;
+    border: 2px solid #000000;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -88,7 +85,7 @@
   }
 
   ::-webkit-scrollbar-corner {
-    background: #07080c;
+    background: #000000;
   }
 
   body.custom-cursor-active,

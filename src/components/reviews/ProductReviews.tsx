@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { reportReview } from "@/app/account/reviews/actions";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { REVIEW_REPORT_REASONS, starsLabel, type ReviewSort } from "@/lib/store/reviews";
 import { reviewImageUrl } from "@/lib/store/media";
 import type { ProductRatingRow, ReviewImageRow, ReviewRow } from "@/lib/supabase/database.types";
@@ -18,9 +20,15 @@ type PublicReview = Pick<
 export function ProductReviews({
   stats,
   reviews,
+  productId,
+  productName,
+  existingReviewId,
 }: {
   stats: ProductRatingRow | null;
   reviews: PublicReview[];
+  productId: string;
+  productName: string;
+  existingReviewId?: string | null;
 }) {
   const { isAuthenticated } = useAuth();
   const [sort, setSort] = useState<ReviewSort>("newest");
@@ -48,7 +56,7 @@ export function ProductReviews({
     <section className="mt-16 sm:mt-24 pt-12 border-t border-border">
       <p className="text-[10px] tracking-[0.28em] font-mono text-muted mb-3">REVIEWS</p>
       {count === 0 ? (
-        <div className="glass p-8 text-center">
+        <div className="glass p-8 text-center mb-8">
           <h2 className="text-2xl font-display tracking-wide mb-2">NO REVIEWS YET</h2>
           <p className="text-sm text-muted">Be the first to review this product.</p>
         </div>
@@ -139,6 +147,35 @@ export function ProductReviews({
           </ul>
         </>
       )}
+
+      <div className="glass p-6 sm:p-8 mt-8">
+        {existingReviewId ? (
+          <div className="space-y-2">
+            <p className="text-[10px] tracking-[0.2em] font-mono text-muted">YOUR REVIEW</p>
+            <p className="text-sm text-muted">You already submitted a review for this product.</p>
+            <Link href={`/account/reviews/${existingReviewId}`} className="inline-block text-xs tracking-[0.16em] text-accent-secondary">
+              EDIT REVIEW
+            </Link>
+          </div>
+        ) : isAuthenticated ? (
+          <>
+            <p className="text-[10px] tracking-[0.22em] font-mono text-muted mb-3">WRITE A REVIEW</p>
+            <h3 className="text-xl font-display tracking-wide mb-4">Share your thoughts</h3>
+            <ReviewForm productId={productId} productName={productName} />
+          </>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-[10px] tracking-[0.22em] font-mono text-muted">WRITE A REVIEW</p>
+            <p className="text-sm text-muted">Sign in to leave a review.</p>
+            <Link
+              href={`/login?next=${encodeURIComponent(`/product/${productId}`)}`}
+              className="inline-block text-xs tracking-[0.16em] text-accent-secondary"
+            >
+              SIGN IN
+            </Link>
+          </div>
+        )}
+      </div>
 
       {reportId && (
         <ReportModal

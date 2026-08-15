@@ -853,6 +853,84 @@ grant select, insert on public.review_reports to authenticated;
 grant select on public.product_ratings to anon, authenticated;
 
 -- ---------------------------------------------------------------------------
+-- Customer review submit (bypasses brittle column grants / RLS on insert)
+-- ---------------------------------------------------------------------------
+create or replace function public.submit_my_review(
+  p_product_id uuid,
+  p_rating integer,
+  p_title text,
+  p_body text,
+  p_order_id uuid default null,
+  p_order_item_id uuid default null,
+  p_size_purchased text default null
+) returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+  rid uuid;
+  clean_title text := left(btrim(coalesce(p_title, '')), 120);
+  clean_body text := left(btrim(coalesce(p_body, '')), 4000);
+begin
+  if uid is null then
+    raise exception 'Not authenticated';
+  end if;
+  if p_product_id is null then
+    raise exception 'Missing product';
+  end if;
+  if p_rating is null or p_rating < 1 or p_rating > 5 then
+    raise exception 'Choose a star rating';
+  end if;
+  if char_length(clean_title) < 1 then
+    raise exception 'Add a review title';
+  end if;
+  if char_length(clean_body) < 8 then
+    raise exception 'Write a little more about the product';
+  end if;
+
+  insert into public.profiles (id, email, display_name, role, is_active)
+  values (
+    uid,
+    coalesce(auth.jwt() ->> 'email', ''),
+    split_part(coalesce(auth.jwt() ->> 'email', 'customer'), '@', 1),
+    'customer',
+    true
+  )
+  on conflict (id) do nothing;
+
+  insert into public.reviews (
+    product_id, user_id, order_id, order_item_id, rating, title, body, size_purchased
+  ) values (
+    p_product_id,
+    uid,
+    p_order_id,
+    p_order_item_id,
+    p_rating,
+    clean_title,
+    clean_body,
+    nullif(btrim(coalesce(p_size_purchased, '')), '')
+  )
+  on conflict (user_id, product_id) do update
+    set rating = excluded.rating,
+        title = excluded.title,
+        body = excluded.body,
+        size_purchased = coalesce(excluded.size_purchased, public.reviews.size_purchased),
+        order_id = coalesce(excluded.order_id, public.reviews.order_id),
+        order_item_id = coalesce(excluded.order_item_id, public.reviews.order_item_id),
+        status = 'pending',
+        updated_at = now()
+  returning id into rid;
+
+  return rid;
+end;
+$$;
+
+revoke all on function public.submit_my_review(uuid, integer, text, text, uuid, uuid, text) from public, anon;
+grant execute on function public.submit_my_review(uuid, integer, text, text, uuid, uuid, text) to authenticated;
+
+-- ---------------------------------------------------------------------------
 -- Storage — review photos (public URLs; DB moderation gates display)
 -- ---------------------------------------------------------------------------
 insert into storage.buckets (id, name, public)

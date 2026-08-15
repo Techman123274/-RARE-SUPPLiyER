@@ -59,7 +59,7 @@ function NavbarInner() {
         initial={false}
         className={cn(
           "fixed top-0 left-0 right-0 z-40 border-b border-border/70 transition-colors duration-300",
-          scrolled ? "glass-strong" : "bg-background/70 backdrop-blur-xl"
+          scrolled ? "bg-black/90 backdrop-blur-xl" : "bg-black"
         )}
       >
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">

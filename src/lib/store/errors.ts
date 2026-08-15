@@ -18,7 +18,15 @@ export function mapStoreError(error: unknown): string {
     }
     return "That value is already in use.";
   }
-  if (code === "23503") return "Related record is missing or was removed.";
+  if (code === "23503") {
+    if (/reviews/i.test(message) && /profiles/i.test(message)) {
+      return "Your account profile is missing. Sign out, sign back in, then try again.";
+    }
+    return "Related record is missing or was removed.";
+  }
+  if (code === "42P01" || /does not exist/i.test(message)) {
+    return "Reviews are not set up on the database yet.";
+  }
   if (code === "42501" || /row-level security/i.test(message) || /permission denied/i.test(message)) {
     return "You do not have permission to do that.";
   }

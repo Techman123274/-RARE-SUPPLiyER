@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
-import { PURCHASED_ORDER_STATUSES } from "@/lib/store/reviews";
+import { REVIEWABLE_ORDER_STATUSES } from "@/lib/store/reviews";
 
 export default async function WriteReviewPage({
   searchParams,
@@ -17,7 +17,13 @@ export default async function WriteReviewPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) notFound();
+  if (!user) {
+    const params = new URLSearchParams();
+    params.set("product", productId);
+    if (orderId) params.set("order", orderId);
+    if (itemId) params.set("item", itemId);
+    redirect(`/login?next=${encodeURIComponent(`/account/reviews/write?${params.toString()}`)}`);
+  }
 
   const { data: product } = await supabase.from("products").select("id, name").eq("id", productId).maybeSingle();
   if (!product) notFound();
@@ -43,7 +49,7 @@ export default async function WriteReviewPage({
       const { data: order } = await supabase.from("orders").select("user_id, status").eq("id", item.order_id).maybeSingle();
       if (
         order?.user_id === user.id &&
-        PURCHASED_ORDER_STATUSES.includes(order.status as (typeof PURCHASED_ORDER_STATUSES)[number])
+        REVIEWABLE_ORDER_STATUSES.includes(order.status as (typeof REVIEWABLE_ORDER_STATUSES)[number])
       ) {
         size = item.size;
       }

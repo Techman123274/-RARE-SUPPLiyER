@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { formatPrice } from "@/lib/utils";
-import { PURCHASED_ORDER_STATUSES } from "@/lib/store/reviews";
+import { REVIEWABLE_ORDER_STATUSES } from "@/lib/store/reviews";
 
 export default async function AccountOrdersPage() {
   if (!isSupabaseConfigured()) {
@@ -53,7 +53,7 @@ export default async function AccountOrdersPage() {
       ) : (
         <ul className="space-y-4">
           {(orders ?? []).map((order) => {
-            const purchased = PURCHASED_ORDER_STATUSES.includes(order.status as (typeof PURCHASED_ORDER_STATUSES)[number]);
+            const purchased = REVIEWABLE_ORDER_STATUSES.includes(order.status as (typeof REVIEWABLE_ORDER_STATUSES)[number]);
             return (
               <li key={order.id} className="border border-border rounded-md p-4 space-y-3">
                 <div className="flex justify-between text-sm">

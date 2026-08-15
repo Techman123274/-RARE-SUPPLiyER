@@ -8,13 +8,24 @@ export async function ProductReviewsSection({ productKey }: { productKey: string
   const supabase = await createServerSupabaseClient();
 
   let productId: string | null = null;
-  const byId = await supabase.from("products").select("id").eq("id", productKey).maybeSingle();
-  if (byId.data) productId = byId.data.id;
-  else {
-    const bySlug = await supabase.from("products").select("id").eq("slug", productKey).maybeSingle();
+  let productName = "Product";
+  const byId = await supabase.from("products").select("id, name").eq("id", productKey).maybeSingle();
+  if (byId.data) {
+    productId = byId.data.id;
+    productName = byId.data.name;
+  } else {
+    const bySlug = await supabase.from("products").select("id, name").eq("slug", productKey).maybeSingle();
     productId = bySlug.data?.id ?? null;
+    if (bySlug.data?.name) productName = bySlug.data.name;
   }
   if (!productId) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: existing } = user
+    ? await supabase.from("reviews").select("id").eq("user_id", user.id).eq("product_id", productId).maybeSingle()
+    : { data: null };
 
   const [{ data: stats }, reviewsRes] = await Promise.all([
     supabase.from("product_ratings").select("*").eq("product_id", productId).maybeSingle(),
@@ -26,8 +37,7 @@ export async function ProductReviewsSection({ productKey }: { productKey: string
       .eq("archived", false)
       .order("created_at", { ascending: false }),
   ]);
-  if (reviewsRes.error) return null;
-  const reviews = reviewsRes.data;
+  const reviews = reviewsRes.error ? [] : reviewsRes.data;
 
   const userIds = [...new Set((reviews ?? []).map((r) => r.user_id))];
   const reviewIds = (reviews ?? []).map((r) => r.id);
@@ -63,7 +73,13 @@ export async function ProductReviewsSection({ productKey }: { productKey: string
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-      <ProductReviews stats={(stats as ProductRatingRow | null) ?? null} reviews={mapped} />
+      <ProductReviews
+        stats={(stats as ProductRatingRow | null) ?? null}
+        reviews={mapped}
+        productId={productId}
+        productName={productName}
+        existingReviewId={existing?.id ?? null}
+      />
     </div>
   );
 }

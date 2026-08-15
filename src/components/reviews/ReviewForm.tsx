@@ -52,14 +52,26 @@ export function ReviewForm({
         setError(null);
         const form = new FormData(e.currentTarget);
         form.set("rating", String(rating));
-        const result = await submitProductReview(form);
-        setLoading(false);
-        if (!result.ok) {
-          setError(result.error ?? "Could not submit review.");
-          return;
+        const photos = form.getAll("photos");
+        form.delete("photos");
+        for (const file of photos) {
+          if (file instanceof File && file.size > 0 && file.size <= 6 * 1024 * 1024) {
+            form.append("photos", file);
+          }
         }
-        setDone(true);
-        router.refresh();
+        try {
+          const result = await submitProductReview(form);
+          if (!result.ok) {
+            setError(result.error ?? "Could not submit review.");
+            return;
+          }
+          setDone(true);
+          router.refresh();
+        } catch {
+          setError("Could not submit review. Please try again.");
+        } finally {
+          setLoading(false);
+        }
       }}
     >
       <input type="hidden" name="product_id" value={productId} />
@@ -93,6 +105,7 @@ export function ReviewForm({
       <textarea
         name="body"
         required
+        minLength={8}
         rows={5}
         maxLength={4000}
         defaultValue={defaultBody}
