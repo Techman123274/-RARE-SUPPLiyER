@@ -12,25 +12,28 @@ export function StoreHero() {
   const reduced = useReducedMotion();
 
   return (
-    <section className="relative h-[100svh] max-h-[100svh] overflow-hidden bg-black -mt-14 pt-14 pb-20 sm:pb-0">
-      <div className="relative z-10 h-full w-full max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col items-center justify-center gap-4 sm:gap-5 py-4 sm:py-6">
+    <section className="relative flex min-h-[calc(100svh-3.5rem)] flex-col overflow-hidden bg-black">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 pt-2 pb-6 sm:px-6 sm:pt-3 sm:pb-8">
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 12, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: DURATION.slow, ease: EASE.premium }}
-          className="flex-1 min-h-0 w-full flex items-center justify-center"
+          className="relative min-h-0 w-full flex-[1.35]"
         >
-          <HeroLoopVideo />
+          {/* Absolute fill: videos are out-of-flow, so a plain h-full child collapses. */}
+          <div className="absolute inset-0">
+            <HeroLoopVideo />
+          </div>
         </motion.div>
 
-        <div className="shrink-0 w-full text-center">
+        <div className="w-full shrink-0 pt-3 text-center sm:pt-4">
           <h1 className="sr-only">{SITE.name}</h1>
 
           <motion.p
             initial={reduced ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08, duration: DURATION.normal, ease: EASE.premium }}
-            className="text-[10px] tracking-[0.42em] text-muted font-mono mb-3 sm:mb-4"
+            className="mb-2 font-mono text-[10px] tracking-[0.42em] text-muted sm:mb-3"
           >
             ONLINE RESALE STORE
           </motion.p>
@@ -39,7 +42,7 @@ export function StoreHero() {
             initial={reduced ? false : { opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.14, duration: DURATION.normal, ease: EASE.premium }}
-            className="font-display text-2xl sm:text-4xl lg:text-5xl tracking-[0.08em] leading-tight mb-3 sm:mb-4"
+            className="mb-3 font-display text-2xl leading-tight tracking-[0.08em] sm:mb-4 sm:text-4xl lg:text-5xl"
           >
             RARE FINDS.
             <br />
@@ -50,7 +53,7 @@ export function StoreHero() {
             initial={reduced ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: DURATION.normal }}
-            className="hidden [@media(min-height:760px)]:block text-sm sm:text-base text-muted max-w-md mx-auto mb-5 sm:mb-6 leading-relaxed"
+            className="mx-auto mb-4 hidden max-w-md text-sm leading-relaxed text-muted [@media(min-height:760px)]:block sm:mb-5 sm:text-base"
           >
             Premium sneakers, clothing and accessories sourced for resale.
           </motion.p>
