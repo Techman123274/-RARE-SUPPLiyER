@@ -84,7 +84,7 @@ export function HeroLoopVideo({ className }: { className?: string }) {
 
   if (reduced) {
     return (
-      <div className={cn("relative mx-auto flex h-full w-full items-center justify-center", className)}>
+      <div className={cn("relative mx-auto flex h-full w-full items-start justify-center pt-1", className)}>
         <Logo variant="hero" linked={false} className="max-h-full w-auto max-w-full h-auto" />
       </div>
     );
@@ -102,7 +102,9 @@ export function HeroLoopVideo({ className }: { className?: string }) {
         disablePictureInPicture
         aria-hidden
         tabIndex={-1}
-        className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none"
+        // object-top keeps the light streak / top of RARE under the nav when the
+        // flex slot is taller than the video (mobile letterboxing).
+        className="absolute inset-0 h-full w-full object-contain object-top pointer-events-none select-none"
       />
       <video
         ref={bRef}
@@ -113,7 +115,7 @@ export function HeroLoopVideo({ className }: { className?: string }) {
         disablePictureInPicture
         aria-hidden
         tabIndex={-1}
-        className="absolute inset-0 h-full w-full object-contain pointer-events-none select-none opacity-0"
+        className="absolute inset-0 h-full w-full object-contain object-top pointer-events-none select-none opacity-0"
       />
     </div>
   );
